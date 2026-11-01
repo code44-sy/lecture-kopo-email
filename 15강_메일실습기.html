@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>비즈니스 메일 실습기 · 15강</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+  :root{
+    --navy:#003876; --navy-soft:#1A5FA8; --accent:#D97706; --accent-soft:#FFF4E5;
+    --ink:#1D1D1F; --muted:#6B7280; --faint:#9AA0A8;
+    --line:#E5E7EB; --line2:#EEF0F3; --bg:#F4F5F7; --card:#FFFFFF;
+    --ok:#1E7F46; --ok-bg:#E9F6EE; --warn:#B0413E; --warn-bg:#FBECEC;
+    --radius:14px; --radius-sm:9px;
+    --fz-body:15px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+    background:var(--bg); color:var(--ink); font-size:var(--fz-body);
+    line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:860px; margin:0 auto; padding:0 16px 64px;}
+
+  /* Header */
+  header{background:var(--navy); color:#fff; padding:22px 0 20px; margin-bottom:18px; -webkit-tap-highlight-color:transparent; user-select:none;}
+  .head-in{max-width:860px; margin:0 auto; padding:0 16px;}
+  .kicker{font-size:12px; letter-spacing:2px; font-weight:700; color:#9DBBE0; margin:0 0 6px;}
+  header h1{font-size:24px; font-weight:800; margin:0; letter-spacing:-0.6px;}
+  header p{margin:7px 0 0; font-size:13.5px; color:#C9D8EC; letter-spacing:-0.2px;}
+  .brand{float:right; font-size:12px; font-weight:700; color:#9DBBE0; margin-top:4px;}
+
+  /* Section card */
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+        padding:18px 18px 20px; margin-bottom:14px;}
+  .step{display:flex; align-items:center; gap:9px; margin:0 0 4px;}
+  .step .n{width:24px; height:24px; border-radius:50%; background:var(--navy); color:#fff;
+           font-size:12.5px; font-weight:700; display:flex; align-items:center; justify-content:center; flex:0 0 auto;}
+  .step h2{font-size:16.5px; font-weight:800; margin:0; letter-spacing:-0.4px;}
+  .step .opt{margin-left:auto; font-size:12px; color:var(--faint);}
+  .hint{font-size:12.5px; color:var(--muted); margin:0 0 12px 33px; letter-spacing:-0.2px;}
+
+  label.fl{display:block; font-size:12.5px; font-weight:700; color:var(--muted); margin:0 0 5px; letter-spacing:-0.2px;}
+  input[type=text], input[type=email], input[type=date], textarea, select{
+    width:100%; font-family:inherit; font-size:14.5px; color:var(--ink);
+    border:1px solid var(--line); border-radius:var(--radius-sm); padding:10px 12px; background:#fff;
+    transition:border-color .15s; -webkit-appearance:none;
+  }
+  input:focus, textarea:focus, select:focus{outline:none; border-color:var(--navy-soft); box-shadow:0 0 0 3px rgba(26,95,168,.12);}
+  textarea{resize:vertical; line-height:1.6;}
+  .row{display:flex; gap:10px; flex-wrap:wrap;}
+  .row > div{flex:1 1 0; min-width:140px;}
+
+  /* chips */
+  .chips{display:flex; gap:8px; flex-wrap:wrap;}
+  .chip{border:1.5px solid var(--line); background:#fff; border-radius:999px; padding:8px 15px;
+        font-size:13.5px; font-weight:600; color:var(--ink); cursor:pointer; transition:.12s; letter-spacing:-0.2px;}
+  .chip:hover{border-color:var(--navy-soft);}
+  .chip.on{background:var(--navy); border-color:var(--navy); color:#fff;}
+
+  /* situation options */
+  .opts{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .opt-card{border:1.5px solid var(--line); border-radius:var(--radius-sm); padding:12px 13px; cursor:pointer; transition:.12s; background:#fff;}
+  .opt-card:hover{border-color:var(--navy-soft);}
+  .opt-card.on{border-color:var(--navy); background:#F3F7FC;}
+  .opt-card .t{font-size:14px; font-weight:700; letter-spacing:-0.3px;}
+  .opt-card .d{font-size:11.5px; color:var(--muted); margin-top:3px; letter-spacing:-0.2px;}
+  .opt-card.on .t{color:var(--navy);}
+
+  /* subject preview row (inbox) */
+  .inbox{border:1px solid var(--line); border-radius:var(--radius-sm); overflow:hidden; margin-top:10px;}
+  .inbox-h{background:#F8F9FB; padding:7px 12px; font-size:11.5px; font-weight:700; color:var(--muted); border-bottom:1px solid var(--line2);}
+  .inbox-row{display:flex; align-items:center; gap:10px; padding:11px 12px;}
+  .inbox-row .dot{width:8px; height:8px; border-radius:50%; background:var(--navy); flex:0 0 auto;}
+  .inbox-row .from{font-size:12.5px; font-weight:700; color:var(--ink); flex:0 0 auto;}
+  .inbox-row .subj{font-size:13px; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1 1 auto;}
+  .inbox-row .subj.empty{color:var(--faint);}
+
+  /* checklist */
+  .checks{list-style:none; margin:0; padding:0;}
+  .checks li{display:flex; align-items:flex-start; gap:9px; padding:7px 0; border-bottom:1px solid var(--line2); font-size:13.5px; letter-spacing:-0.2px;}
+  .checks li:last-child{border-bottom:none;}
+  .checks .mk{width:20px; height:20px; border-radius:50%; flex:0 0 auto; display:flex; align-items:center; justify-content:center;
+              font-size:12px; font-weight:800; background:#EEF0F3; color:var(--faint); margin-top:1px;}
+  .checks li.done .mk{background:var(--ok-bg); color:var(--ok);}
+  .checks li.done .txt{color:var(--ink);}
+  .checks .txt{color:var(--muted);}
+  .checks .txt b{color:var(--ink);}
+
+  .tagline-note{background:var(--accent-soft); border:1px solid #F3D9B5; border-radius:var(--radius-sm);
+                padding:11px 13px; font-size:12.5px; color:#7A4A12; margin-top:12px; letter-spacing:-0.2px;}
+  .tagline-note b{color:var(--accent);}
+
+  /* buttons */
+  .actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;}
+  .btn{font-family:inherit; font-size:14.5px; font-weight:700; border-radius:var(--radius-sm); padding:13px 18px;
+       cursor:pointer; border:1.5px solid transparent; transition:.12s; letter-spacing:-0.2px;}
+  .btn-primary{background:var(--navy); color:#fff; flex:1 1 220px;}
+  .btn-primary:hover{background:#002a59;}
+  .btn-primary:disabled{background:#C3CAD3; cursor:not-allowed;}
+  .btn-ghost{background:#fff; color:var(--navy); border-color:var(--line);}
+  .btn-ghost:hover{border-color:var(--navy-soft);}
+  .btn-sm{font-size:12.5px; padding:8px 12px; font-weight:700; border-radius:7px; border:1px solid var(--line); background:#fff; color:var(--navy); cursor:pointer;}
+  .btn-sm:hover{border-color:var(--navy-soft);}
+
+  .saved{font-size:11.5px; color:var(--faint); margin-left:auto; align-self:center;}
+  .toolbar{display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap;}
+
+  .ex-body{font-size:13.5px; color:var(--ink); white-space:pre-wrap; line-height:1.75;
+           background:#FAFBFC; border:1px solid var(--line2); border-radius:var(--radius-sm); padding:14px 15px;}
+
+  /* confirm modal */
+  .modal-bg{position:fixed; inset:0; background:rgba(15,23,42,.45); display:none; align-items:center; justify-content:center; padding:18px; z-index:50;}
+  .modal-bg.on{display:flex;}
+  .modal{background:#fff; border-radius:16px; max-width:420px; width:100%; padding:22px;}
+  .modal h3{margin:0 0 4px; font-size:17px; font-weight:800; letter-spacing:-0.4px;}
+  .modal p{margin:0 0 14px; font-size:13px; color:var(--muted);}
+  .modal .chk{display:flex; gap:10px; align-items:flex-start; padding:10px; border:1px solid var(--line); border-radius:9px; margin-bottom:8px; cursor:pointer;}
+  .modal .chk input{width:18px; height:18px; margin-top:1px; flex:0 0 auto; accent-color:var(--navy);}
+  .modal .chk span{font-size:13.5px; letter-spacing:-0.2px;}
+  .modal .chk b{color:var(--navy);}
+  .modal-actions{display:flex; gap:9px; margin-top:6px;}
+
+  .foot{font-size:11.5px; color:var(--faint); text-align:center; margin-top:18px; letter-spacing:-0.1px;}
+  .toast{position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(20px); background:var(--ink); color:#fff;
+         font-size:13px; font-weight:600; padding:11px 18px; border-radius:999px; opacity:0; pointer-events:none; transition:.25s; z-index:60;}
+  .toast.on{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  @media (max-width:560px){
+    .opts{grid-template-columns:1fr;}
+    header h1{font-size:21px;}
+    .brand{display:none;}
+  }
+</style>
+</head>
+<body>
+<header id="appHeader">
+  <div class="head-in">
+    <span class="brand">All바른교육 · 한국폴리텍대학</span>
+    <p class="kicker">15강 · 직장생활과 비즈니스 매너</p>
+    <h1>비즈니스 메일 실습기</h1>
+    <p>교수님께 보내는 ‘결석 사전 양해 메일’을 직접 써서 보내봅니다. 연차 신청과 구조가 똑같습니다.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- 설정: 받는 사람 -->
+  <div class="card">
+    <div class="step"><span class="n">✓</span><h2>받는 사람 (교수 이메일)</h2><span class="opt">한 번만 입력</span></div>
+    <p class="hint">선생님이 수업 전에 한 번만 입력해 두면 학생 모두에게 적용됩니다. (이 기기에 저장됩니다)</p>
+    <label class="fl">교수 이메일 주소</label>
+    <input type="email" id="profEmail" placeholder="professor@example.ac.kr" autocomplete="off">
+  </div>
+
+  <!-- 1단계 내 정보 -->
+  <div class="card">
+    <div class="step"><span class="n">1</span><h2>내 정보</h2></div>
+    <p class="hint">본인의 과와 이름을 입력하세요.</p>
+    <label class="fl">학과</label>
+    <div class="chips" id="deptChips">
+      <button class="chip" data-dept="기계보전과">기계보전과</button>
+      <button class="chip" data-dept="전기과">전기과</button>
+      <button class="chip" data-dept="전기자동차과">전기자동차과</button>
+    </div>
+    <div style="margin-top:12px;">
+      <label class="fl">이름</label>
+      <input type="text" id="name" placeholder="예) 김철수" autocomplete="off">
+    </div>
+  </div>
+
+  <!-- 2단계 상황 -->
+  <div class="card">
+    <div class="step"><span class="n">2</span><h2>내 상황 고르기</h2></div>
+    <p class="hint">본인 현실에 맞는 상황을 고르면 제목과 본문이 자동으로 채워집니다. (고른 뒤 자유롭게 수정하세요)</p>
+    <div class="opts" id="sitOpts">
+      <div class="opt-card" data-sit="interview"><div class="t">면접 일정과 수업이 겹침</div><div class="d">가장 현실적인 상황</div></div>
+      <div class="opt-card" data-sit="exam"><div class="t">국가기술자격 실기시험 응시</div><div class="d">응시 종목을 직접 입력</div></div>
+      <div class="opt-card" data-sit="fair"><div class="t">채용박람회 · 현장실습 참가</div><div class="d">외부 행사 참가</div></div>
+      <div class="opt-card" data-sit="leave"><div class="t">연차 신청 (직장인 버전)</div><div class="d">해당 없을 때 — 미래 연습용</div></div>
+    </div>
+    <div class="row" style="margin-top:13px;">
+      <div>
+        <label class="fl" id="dateLbl">결석 날짜</label>
+        <input type="date" id="theDate">
+      </div>
+      <div>
+        <label class="fl" id="detailLbl">세부 (선택)</label>
+        <input type="text" id="detail" placeholder="예) ○○기업" autocomplete="off">
+      </div>
+    </div>
+  </div>
+
+  <!-- 3단계 제목 -->
+  <div class="card">
+    <div class="step"><span class="n">3</span><h2>제목 — 직접 작성</h2><span class="opt">규칙: [소속] 용건 - 이름</span></div>
+    <p class="hint">맨 앞에 <b>[실습]</b>을 붙입니다. 안 그러면 교수님이 실제 승인으로 오해할 수 있어요.</p>
+    <input type="text" id="subject" placeholder="[실습][소속] 용건 - 이름 형식으로 직접 작성하세요">
+    <div class="inbox">
+      <div class="inbox-h">교수 메일함에서는 이렇게 보입니다 — ‘제목 줄’</div>
+      <div class="inbox-row"><span class="dot"></span><span class="from" id="ibFrom">보낸사람</span><span class="subj empty" id="ibSubj">제목을 입력하면 여기에 보입니다</span></div>
+    </div>
+  </div>
+
+  <!-- 4단계 본문 -->
+  <div class="card">
+    <div class="step"><span class="n">4</span><h2>본문 — 직접 작성</h2></div>
+    <p class="hint">두괄식으로 직접 써 보세요. 순서: 인사 + 소속·이름 → 결론(결석/연차)을 먼저 → 사유 → 후속(보강 문의 / 인수인계) → 감사 → 서명. 아래 ‘5원칙 체크’가 실시간으로 도와줍니다.</p>
+    <textarea id="body" rows="13" placeholder="여기에 본인 메일을 직접 작성하세요. (인사+소속·이름 → 결론 → 사유 → 후속 → 감사 → 서명)"></textarea>
+  </div>
+
+  <!-- 완성 예시 (히든: 헤더 5번 탭으로 열림) -->
+  <div class="card" id="exCard" style="display:none;">
+    <div class="step"><span class="n" style="background:var(--accent);">★</span><h2>완성 예시 (참고용)</h2></div>
+    <p class="hint">직접 써본 뒤 비교해 보세요. 그대로 베끼기보다 ‘내 메일과 어디가 다른지’를 찾는 게 핵심입니다.</p>
+    <div class="ex-body" id="exampleBox">상황을 먼저 골라주세요.</div>
+  </div>
+
+  <!-- 체크 -->
+  <div class="card">
+    <div class="step"><span class="n">✓</span><h2>메일 5원칙 체크</h2></div>
+    <p class="hint">하나씩 켜지면 좋은 메일에 가까워집니다. 다 안 켜져도 괜찮아요 :)</p>
+    <ul class="checks" id="checks">
+      <li data-k="subj"><span class="mk">!</span><span class="txt"><b>제목</b>이 [실습][소속] 용건 - 이름 형식</span></li>
+      <li data-k="greet"><span class="mk">!</span><span class="txt"><b>첫 줄</b>에 인사 + 소속 · 이름</span></li>
+      <li data-k="lead"><span class="mk">!</span><span class="txt"><b>결론(결석/연차)</b>을 앞쪽에 먼저 (두괄식)</span></li>
+      <li data-k="follow"><span class="mk">!</span><span class="txt"><b>후속</b> 한마디 (보강 문의 / 인수인계)</span></li>
+      <li data-k="sign"><span class="mk">!</span><span class="txt"><b>끝에 서명</b> (소속 · 이름 · 연락처)</span></li>
+    </ul>
+    <div class="tagline-note"><b>보내기 전 3확인</b> &nbsp;받는사람 · 제목 · 첨부 — 이 습관이 첨부 누락(직장인 메일 실수 1위)을 막습니다.</div>
+  </div>
+
+  <!-- 액션 -->
+  <div class="card">
+    <div class="actions">
+      <button class="btn btn-primary" id="sendBtn" disabled>교수님께 메일 보내기</button>
+      <button class="btn btn-ghost" id="copyAll">전체 복사</button>
+    </div>
+    <div class="toolbar" style="margin-top:12px;">
+      <button class="btn-sm" id="copySubj">제목만 복사</button>
+      <button class="btn-sm" id="copyBody">본문만 복사</button>
+      <button class="btn-sm" id="resetBtn" style="color:var(--warn); border-color:#F0D2D2;">초기화</button>
+      <span class="saved" id="savedMsg"></span>
+    </div>
+  </div>
+
+  <p class="foot">‘보내기’를 누르면 기기의 메일 앱(Gmail · Outlook 등)이 제목 · 본문이 채워진 상태로 열립니다.<br>메일 앱에서 한 번 더 확인한 뒤 전송하세요. · 인터넷 없이도 작동합니다.</p>
+</div>
+
+<!-- 3확인 모달 -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h3>보내기 전, 3가지만 확인할게요</h3>
+    <p>직장인이 매일 하는 습관입니다.</p>
+    <label class="chk"><input type="checkbox" class="cf"><span><b>받는사람</b> — 교수님 이메일이 맞나요?</span></label>
+    <label class="chk"><input type="checkbox" class="cf"><span><b>제목</b> — [실습][소속] 용건 - 이름 규칙을 지켰나요?</span></label>
+    <label class="chk"><input type="checkbox" class="cf"><span><b>첨부</b> — 붙일 파일이 있다면 메일 앱에서 챙겼나요?</span></label>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="modalCancel" style="flex:1;">다시 보기</button>
+      <button class="btn btn-primary" id="modalSend" style="flex:1.4;" disabled>메일 앱 열기</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+  // ▼▼ 선생님께: 아래 따옴표 안에 본인 이메일을 한 번 넣고 저장해서 배포하면,
+  //    학생들이 받은 파일 전부에 받는사람이 자동 입력됩니다. (비워두면 학생이 직접 입력)
+  var DEFAULT_PROF_EMAIL = "";   // 예: "hong@kopo.ac.kr"
+  var KEY = "lec15_mail_practice_v2";
+  var state = { profEmail:"", dept:"", name:"", sit:"", date:"", detail:"", subject:"", body:"",
+                subjectEdited:false, bodyEdited:false };
+
+  var WD = ["일","월","화","수","목","금","토"];
+
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return (s||"").trim(); }
+
+  function fmtDate(iso){
+    if(!iso) return "O월 O일(O)";
+    var p = iso.split("-");
+    if(p.length!==3) return "O월 O일(O)";
+    var d = new Date(+p[0], +p[1]-1, +p[2]);
+    if(isNaN(d.getTime())) return "O월 O일(O)";
+    return (+p[1]) + "월 " + (+p[2]) + "일(" + WD[d.getDay()] + ")";
+  }
+
+  // ---- 상황별 문구 ----
+  function buildSubject(){
+    var dept = state.dept || "○○과";
+    var name = esc(state.name) || "이름";
+    var dstr = fmtDate(state.date);
+    var purpose;
+    switch(state.sit){
+      case "interview": purpose = dstr + " 면접 일정으로 인한 결석 사전 양해"; break;
+      case "exam":      purpose = dstr + " " + (esc(state.detail)||"국가기술자격") + " 실기시험 응시로 인한 결석 사전 양해"; break;
+      case "fair":      purpose = dstr + " 채용박람회 참가로 인한 결석 사전 양해"; break;
+      case "leave":     purpose = "연차 신청(" + dstr + ", 1일)"; break;
+      default:          purpose = dstr + " 결석 사전 양해";
+    }
+    return "[실습][" + dept + "] " + purpose + " - " + name;
+  }
+
+  function buildBody(){
+    var dept = state.dept || "○○과";
+    var name = esc(state.name) || "이름";
+    var dstr = fmtDate(state.date);
+    var detail = esc(state.detail);
+    var L = [];
+    if(state.sit === "leave"){
+      L.push("안녕하세요, 팀장님. " + name + "입니다.");
+      L.push("");
+      L.push(dstr + " 연차를 사용하고자 미리 보고드립니다. 개인 사정으로 하루 쉬려고 합니다.");
+      L.push("");
+      L.push("진행 중인 업무는 전날까지 마무리하고, 급한 건은 동료에게 공유해 두겠습니다.");
+      L.push("");
+      L.push("확인 부탁드립니다. 감사합니다.");
+      L.push("");
+      L.push(name);
+      L.push("010-0000-0000");
+    } else {
+      var reason;
+      if(state.sit === "interview") reason = "같은 날 " + (detail ? detail + " " : "") + "면접이 있어 참석이 어렵습니다.";
+      else if(state.sit === "exam") reason = "같은 날 " + (detail || "국가기술자격") + " 실기시험이 있어 참석이 어렵습니다.";
+      else if(state.sit === "fair") reason = "같은 날 " + (detail || "채용박람회") + " 참가로 참석이 어렵습니다.";
+      else reason = (detail ? "같은 날 " + detail + " 일정이 있어 참석이 어렵습니다." : "사정이 있어 참석이 어렵습니다.");
+
+      L.push("안녕하세요, 교수님. " + dept + " " + name + "입니다.");
+      L.push("");
+      L.push(dstr + " 취업역량강화 수업에 부득이하게 결석하게 되어 미리 양해를 구합니다. " + reason);
+      L.push("");
+      L.push("빠지는 진도와 과제는 제가 먼저 확인해 따라가겠습니다. 따로 해야 할 것이 있으면 말씀해 주시면 챙기겠습니다.");
+      L.push("");
+      L.push("미리 양해해 주셔서 감사합니다.");
+      L.push("");
+      L.push(dept + " " + name);
+      L.push("010-0000-0000");
+    }
+    return L.join("\n");
+  }
+
+  // ---- 렌더 ----
+  function applyTemplates(force){
+    renderPreview(); renderChecks(); renderExample(); refreshSendBtn(); save();
+  }
+
+  function renderPreview(){
+    var subj = esc($("subject").value);
+    var ib = $("ibSubj");
+    if(subj){ ib.textContent = subj; ib.classList.remove("empty"); }
+    else { ib.textContent = "제목을 입력하면 여기에 보입니다"; ib.classList.add("empty"); }
+    var nm = esc(state.name);
+    $("ibFrom").textContent = nm ? (nm + " 학생") : "보낸사람";
+  }
+
+  function renderChecks(){
+    var subj = esc($("subject").value);
+    var body = $("body").value || "";
+    var lines = body.split("\n").map(function(s){return s.trim();}).filter(function(s){return s.length;});
+    var first = lines[0] || "";
+    var headBlock = lines.slice(0,4).join(" ");
+    var tailBlock = lines.slice(-3).join(" ");
+    var name = esc(state.name);
+    var dept = state.dept;
+
+    var r = {};
+    r.subj = subj.indexOf("[실습]") === 0 && (dept ? subj.indexOf("["+dept+"]")>-1 : /\[[^\]]+\]\s*\[[^\]]+\]/.test(subj)) && (name ? subj.indexOf(name)>-1 : subj.indexOf(" - ")>-1);
+    r.greet = /안녕|안녕하세요/.test(first) && (name ? first.indexOf(name)>-1 : true) && (dept ? first.indexOf(dept)>-1 : true);
+    r.lead = /결석|연차|양해/.test(headBlock);
+    r.follow = /보강|인수인계|보충|확인|문의|따라가|챙기|공유/.test(body);
+    r.sign = name ? tailBlock.indexOf(name)>-1 : /연락처|010/.test(tailBlock);
+
+    var done = 0;
+    document.querySelectorAll("#checks li").forEach(function(li){
+      var k = li.getAttribute("data-k");
+      var ok = !!r[k];
+      li.classList.toggle("done", ok);
+      li.querySelector(".mk").textContent = ok ? "✓" : "!";
+      if(ok) done++;
+    });
+    return done;
+  }
+
+  function renderExample(){
+    var box = $("exampleBox");
+    if(!state.sit){ box.textContent = "상황을 먼저 골라주세요."; return; }
+    box.textContent = "제목: " + buildSubject() + "\n\n" + buildBody();
+  }
+
+  function refreshSendBtn(){
+    var ok = esc($("profEmail").value).length>3 && esc(state.name).length>0 && state.dept && state.sit
+             && esc($("subject").value).length>0 && esc($("body").value).length>0;
+    $("sendBtn").disabled = !ok;
+  }
+
+  // ---- 저장/복원 ----
+  function save(){
+    state.profEmail = $("profEmail").value;
+    state.name = $("name").value;
+    state.subject = $("subject").value;
+    state.body = $("body").value;
+    state.date = $("theDate").value;
+    state.detail = $("detail").value;
+    try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
+    var m = $("savedMsg"); m.textContent = "초안 저장됨 ✓";
+    clearTimeout(save._t); save._t = setTimeout(function(){ m.textContent=""; }, 1400);
+  }
+  function load(){
+    try{
+      var raw = localStorage.getItem(KEY); if(!raw) return;
+      var s = JSON.parse(raw); if(!s) return;
+      Object.assign(state, s);
+      $("profEmail").value = state.profEmail||"";
+      $("name").value = state.name||"";
+      $("theDate").value = state.date||"";
+      $("detail").value = state.detail||"";
+      if(state.dept) markDept(state.dept);
+      if(state.sit) markSit(state.sit);
+      if(state.subject){ $("subject").value = state.subject; }
+      if(state.body){ $("body").value = state.body; }
+    }catch(e){}
+  }
+
+  function markDept(d){
+    state.dept = d;
+    document.querySelectorAll("#deptChips .chip").forEach(function(c){ c.classList.toggle("on", c.getAttribute("data-dept")===d); });
+  }
+  function markSit(s){
+    state.sit = s;
+    document.querySelectorAll("#sitOpts .opt-card").forEach(function(c){ c.classList.toggle("on", c.getAttribute("data-sit")===s); });
+    // 라벨 상황화
+    if(s==="leave"){ $("dateLbl").textContent="연차 날짜"; $("detailLbl").textContent="세부 (선택)"; $("detail").placeholder="비워두어도 됩니다"; }
+    else if(s==="interview"){ $("dateLbl").textContent="결석 날짜"; $("detailLbl").textContent="기업명 (선택)"; $("detail").placeholder="예) ○○기업"; }
+    else if(s==="fair"){ $("dateLbl").textContent="결석 날짜"; $("detailLbl").textContent="행사명 (선택)"; $("detail").placeholder="예) ○○ 채용박람회"; }
+    else if(s==="exam"){ $("dateLbl").textContent="결석 날짜"; $("detailLbl").textContent="응시 종목"; $("detail").placeholder="예) 전기산업기사 · 전기기사"; }
+    else { $("dateLbl").textContent="결석 날짜"; $("detailLbl").textContent="세부 (선택)"; $("detail").placeholder="비워두어도 됩니다"; }
+  }
+
+  function toast(msg){
+    var t = $("toast"); t.textContent = msg; t.classList.add("on");
+    clearTimeout(toast._t); toast._t = setTimeout(function(){ t.classList.remove("on"); }, 1900);
+  }
+  function copy(text){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){toast("복사했습니다");}, function(){fallbackCopy(text);});
+    } else { fallbackCopy(text); }
+  }
+  function fallbackCopy(text){
+    var ta = document.createElement("textarea"); ta.value = text; ta.style.position="fixed"; ta.style.opacity="0";
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand("copy"); toast("복사했습니다"); }catch(e){ toast("복사 실패 — 직접 선택해 복사하세요"); }
+    document.body.removeChild(ta);
+  }
+
+  // ---- 이벤트 ----
+  document.querySelectorAll("#deptChips .chip").forEach(function(c){
+    c.addEventListener("click", function(){ markDept(c.getAttribute("data-dept")); applyTemplates(false); });
+  });
+  document.querySelectorAll("#sitOpts .opt-card").forEach(function(c){
+    c.addEventListener("click", function(){ markSit(c.getAttribute("data-sit")); applyTemplates(true); });
+  });
+  $("name").addEventListener("input", function(){ state.name=this.value; applyTemplates(false); });
+  $("theDate").addEventListener("input", function(){ state.date=this.value; applyTemplates(false); });
+  $("detail").addEventListener("input", function(){ state.detail=this.value; applyTemplates(false); });
+  $("profEmail").addEventListener("input", function(){ refreshSendBtn(); save(); });
+
+  $("subject").addEventListener("input", function(){ state.subjectEdited=true; renderPreview(); renderChecks(); refreshSendBtn(); save(); });
+  $("body").addEventListener("input", function(){ state.bodyEdited=true; renderChecks(); refreshSendBtn(); save(); });
+
+  $("copySubj").addEventListener("click", function(){ copy($("subject").value); });
+  $("copyBody").addEventListener("click", function(){ copy($("body").value); });
+  $("copyAll").addEventListener("click", function(){ copy("제목: "+$("subject").value+"\n\n"+$("body").value); });
+
+  $("resetBtn").addEventListener("click", function(){
+    if(!confirm("받는사람 이메일만 남기고 모두 지울까요?")) return;
+    var email = $("profEmail").value;
+    state = { profEmail:email, dept:"", name:"", sit:"", date:"", detail:"", subject:"", body:"", subjectEdited:false, bodyEdited:false };
+    $("name").value=""; $("theDate").value=""; $("detail").value=""; $("subject").value=""; $("body").value="";
+    document.querySelectorAll(".chip.on,.opt-card.on").forEach(function(e){e.classList.remove("on");});
+    renderPreview(); renderChecks(); $("exampleBox").textContent="상황을 먼저 골라주세요."; refreshSendBtn(); save(); toast("초기화했습니다");
+  });
+
+  // 보내기 → 모달
+  $("sendBtn").addEventListener("click", function(){
+    document.querySelectorAll(".modal .cf").forEach(function(c){ c.checked=false; });
+    $("modalSend").disabled = true;
+    $("modal").classList.add("on");
+  });
+  document.querySelectorAll(".modal .cf").forEach(function(c){
+    c.addEventListener("change", function(){
+      var all = Array.prototype.every.call(document.querySelectorAll(".modal .cf"), function(x){return x.checked;});
+      $("modalSend").disabled = !all;
+    });
+  });
+  $("modalCancel").addEventListener("click", function(){ $("modal").classList.remove("on"); });
+  $("modal").addEventListener("click", function(e){ if(e.target===$("modal")) $("modal").classList.remove("on"); });
+
+  $("modalSend").addEventListener("click", function(){
+    var to = esc($("profEmail").value);
+    var subj = $("subject").value;
+    var body = $("body").value;
+    var url = "mailto:" + encodeURIComponent(to) + "?subject=" + encodeURIComponent(subj) + "&body=" + encodeURIComponent(body);
+    $("modal").classList.remove("on");
+    toast("메일 앱을 엽니다 — 마지막으로 확인하고 전송하세요");
+    window.location.href = url;
+  });
+
+  // 히든키 — 헤더를 5번 탭하면 완성 예시 토글 (다시 5번 누르면 숨김)
+  var tapCount = 0, tapTimer = null;
+  $("appHeader").addEventListener("click", function(){
+    tapCount++;
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(function(){ tapCount = 0; }, 1500);
+    if(tapCount >= 5){
+      tapCount = 0; clearTimeout(tapTimer);
+      var card = $("exCard");
+      var isHidden = (window.getComputedStyle(card).display === "none");
+      if(isHidden){
+        renderExample();
+        card.style.display = "block";
+        card.scrollIntoView({ behavior:"smooth", block:"start" });
+        toast("완성 예시를 열었습니다 — 다시 5번 누르면 숨겨집니다");
+      } else {
+        card.style.display = "none";
+        toast("완성 예시를 숨겼습니다");
+      }
+    }
+  });
+
+  // 초기화
+  load();
+  if(!esc($("profEmail").value) && DEFAULT_PROF_EMAIL){ $("profEmail").value = DEFAULT_PROF_EMAIL; state.profEmail = DEFAULT_PROF_EMAIL; }
+  if(!state.sit){ renderPreview(); renderChecks(); }
+  else { applyTemplates(false); }
+  renderExample(); refreshSendBtn();
+})();
+</script>
+</body>
+</html>
